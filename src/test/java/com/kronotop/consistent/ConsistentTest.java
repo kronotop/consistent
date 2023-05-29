@@ -26,12 +26,10 @@ package com.kronotop.consistent;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static com.google.common.hash.Hashing.murmur3_32_fixed;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ConsistentTest {
     protected final Config config = new Config();
@@ -69,7 +67,7 @@ public class ConsistentTest {
     }
 
     @Test
-    public void testAverageLoad(){
+    public void testAverageLoad() {
         Consistent consistent = new Consistent(config, hashing);
 
         Member member = new MockMemberImpl("member-1");
@@ -78,27 +76,23 @@ public class ConsistentTest {
         assertTrue(consistent.averageLoad() > 0);
     }
 
-    /*
-    @Test
-    public void testGetPartitionOwner() throws UnknownHostException {
-        Consistent consistent = new Consistent(config);
 
-        Address addressOne = new Address("localhost", 0);
-        Member memberOne = new Member(addressOne, Instant.now().toEpochMilli());
+    @Test
+    public void testGetPartitionOwner() {
+        Consistent consistent = new Consistent(config, hashing);
+
+        Member memberOne = new MockMemberImpl("member-1");
         consistent.addMember(memberOne);
 
-        Address addressTwo = new Address("localhost", 0);
-        Member memberTwo = new Member(addressTwo, Instant.now().toEpochMilli());
+        Member memberTwo = new MockMemberImpl("member-2");
         consistent.addMember(memberTwo);
 
         List<Member> expectedMembers = new ArrayList<>();
         expectedMembers.add(memberOne);
         expectedMembers.add(memberTwo);
 
-        double partitionCount = config.getDouble("cluster.consistent.partition_count");
-
         List<Member> result = new ArrayList<>();
-        for (int partID = 0; partID < partitionCount; partID++) {
+        for (int partID = 0; partID < config.getPartitionCount(); partID++) {
             Member owner = consistent.getPartitionOwner(partID);
             result.add(owner);
         }
@@ -107,7 +101,7 @@ public class ConsistentTest {
 
     @Test
     public void testLocate_EmptyHashRing() {
-        Consistent consistent = new Consistent(config);
+        Consistent consistent = new Consistent(config, hashing);
         NoPartitionOwnerFoundException exception = assertThrows(
                 NoPartitionOwnerFoundException.class,
                 () -> consistent.locate("foobar")
@@ -116,15 +110,13 @@ public class ConsistentTest {
     }
 
     @Test
-    public void testLocate() throws UnknownHostException {
-        Consistent consistent = new Consistent(config);
+    public void testLocate() {
+        Consistent consistent = new Consistent(config, hashing);
 
-        Address addressOne = new Address("localhost", 0);
-        Member memberOne = new Member(addressOne, Instant.now().toEpochMilli());
+        Member memberOne = new MockMemberImpl("member-1");
         consistent.addMember(memberOne);
 
-        Address addressTwo = new Address("localhost", 0);
-        Member memberTwo = new Member(addressTwo, Instant.now().toEpochMilli());
+        Member memberTwo = new MockMemberImpl("member-2");
         consistent.addMember(memberTwo);
 
         Set<String> members = new HashSet<>();
@@ -137,16 +129,11 @@ public class ConsistentTest {
 
     @Test
     public void testLoadDistribution() {
-        Consistent consistent = new Consistent(config);
+        Consistent consistent = new Consistent(config, hashing);
 
         for (int i = 1; i <= 10; i++) {
-            try {
-                Address address = new Address("localhost", 0);
-                Member m = new Member(address, Instant.now().toEpochMilli());
-                consistent.addMember(m);
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            }
+            Member member = new MockMemberImpl(String.format("member-%d", i));
+            consistent.addMember(member);
         }
 
         double averageLoad = consistent.averageLoad();
@@ -157,25 +144,23 @@ public class ConsistentTest {
     }
 
     @Test
-    public void testRemoveMember_EmptyHashRing() throws UnknownHostException {
-        Consistent consistent = new Consistent(config);
+    public void testRemoveMember_EmptyHashRing() {
+        Consistent consistent = new Consistent(config, hashing);
 
-        Address address = new Address("localhost", 0);
-        Member member = new Member(address, Instant.now().toEpochMilli());
+        Member member = new MockMemberImpl("member-1");
+        consistent.addMember(member);
 
         assertDoesNotThrow(() -> consistent.removeMember(member));
     }
 
     @Test
-    public void testRemove() throws UnknownHostException {
-        Consistent consistent = new Consistent(config);
+    public void testRemove() {
+        Consistent consistent = new Consistent(config, hashing);
 
-        Address addressOne = new Address("localhost", 0);
-        Member memberOne = new Member(addressOne, Instant.now().toEpochMilli());
+        Member memberOne = new MockMemberImpl("member-1");
         consistent.addMember(memberOne);
 
-        Address addressTwo = new Address("localhost", 0);
-        Member memberTwo = new Member(addressTwo, Instant.now().toEpochMilli());
+        Member memberTwo = new MockMemberImpl("member-2");
         consistent.addMember(memberTwo);
 
         consistent.removeMember(memberTwo);
@@ -188,18 +173,13 @@ public class ConsistentTest {
     public void testConsistentWithInitialMembers() {
         List<Member> members = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
-            try {
-                Address address = new Address("localhost", 0);
-                Member m = new Member(address, Instant.now().toEpochMilli());
-                members.add(m);
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            }
+            Member member = new MockMemberImpl(String.format("member-%d", i));
+            members.add(member);
         }
 
-        Consistent consistent = new Consistent(config, members);
+        Consistent consistent = new Consistent(config, hashing, members);
         List<Member> currentMembers = consistent.getMembers();
         assertEquals(10, members.size());
         assertTrue(currentMembers.containsAll(members));
-    }*/
+    }
 }

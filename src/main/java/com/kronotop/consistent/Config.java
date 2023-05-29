@@ -38,27 +38,27 @@ public class Config {
         loadFactor = DEFAULT_LOAD_FACTOR;
     }
 
-    public void setLoadFactor(double loadFactor) {
-        this.loadFactor = loadFactor;
-    }
-
-    public void setPartitionCount(int partitionCount) {
-        this.partitionCount = partitionCount;
-    }
-
-    public void setReplicationFactor(int replicationFactor) {
-        this.replicationFactor = replicationFactor;
-    }
-
     public double getLoadFactor() {
         return loadFactor;
+    }
+
+    public void setLoadFactor(double loadFactor) {
+        this.loadFactor = loadFactor;
     }
 
     public int getPartitionCount() {
         return partitionCount;
     }
 
+    public void setPartitionCount(int partitionCount) {
+        this.partitionCount = partitionCount;
+    }
+
     public int getReplicationFactor() {
         return replicationFactor;
+    }
+
+    public void setReplicationFactor(int replicationFactor) {
+        this.replicationFactor = replicationFactor;
     }
 }

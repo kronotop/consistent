@@ -23,5 +23,5 @@
 
 package com.kronotop.consistent;
 
-public class NoPartitionOwnerFoundException extends RuntimeException{
+public class NoPartitionOwnerFoundException extends RuntimeException {
 }
